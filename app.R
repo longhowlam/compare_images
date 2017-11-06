@@ -1,7 +1,7 @@
 #### Description ###############################################################
 ##
-##
-##
+## Skeleton Shiny app  using miniUI 
+## This will look just better on mobile devices
 ##
 
 
