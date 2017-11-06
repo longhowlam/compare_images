@@ -1,47 +1,80 @@
+#### Description ###############################################################
+##
+##
+##
+##
+
+
+#### Libraries needed #########################################################
 library(shiny)
 library(miniUI)
-
 library(jpeg)
 library(keras)
+
+
+
+##### Initals / startup code #################################################
 
 vgg16_notop = application_vgg16(weights = 'imagenet', include_top = FALSE)
 
 
+#### MINIPAGE #################################################################
+
 ui <- miniPage(
-  gadgetTitleBar(left = NULL, right = NULL,"compare an image"),
+  gadgetTitleBar(
+    left = NULL, 
+    right = NULL,
+    "compare an image"
+  ),
+  
   miniTabstripPanel(
     
-    miniTabPanel("introduction", icon = icon("area-chart"),
-                 miniContentPanel(
-                   htmlOutput("intro")
-                 )
+    #### introduction tab ############
+    miniTabPanel(
+      "introduction", icon = icon("area-chart"),
+      miniContentPanel(
+        htmlOutput("intro")
+      )
     ),
     
-    miniTabPanel( "Parameters", icon = icon("sliders"),
-                 miniContentPanel(
-                   fileInput('file1', 'Choose an image (max 5MB)'),
-                   numericInput("input1", "dummy input 1", value=100),
-                   numericInput("input2", "dummy input 2", value=2),
-                   checkboxInput("input3", "dummy input 3", value = FALSE)
-                 )
+    #### parameters tab ##############
+    miniTabPanel(
+      "Parameters", icon = icon("sliders"),
+      miniContentPanel(
+        fileInput('file1', 'Choose an image (max 5MB)'),
+        numericInput("input1", "dummy input 1", value=100),
+        numericInput("input2", "dummy input 2", value=2),
+        checkboxInput("input3", "dummy input 3", value = FALSE)
+      )
     ),
  
-    miniTabPanel("image", icon = icon("file-image-o"),
-                 miniContentPanel(
-                   padding = 0,
-                   imageOutput("plaatje")
-                 )
+    #### image tab ##################
+    miniTabPanel(
+      "image", icon = icon("file-image-o"),
+      miniContentPanel(
+        padding = 0,
+        imageOutput("plaatje")
+      )
     ),
-    miniTabPanel("Resultaat", icon = icon("table"),
-                 miniContentPanel(
-                   verbatimTextOutput("ResultaatOut")
-                 )
+    
+    #### Resultaat tab ############
+    miniTabPanel(
+      "Resultaat", icon = icon("table"),
+      miniContentPanel(
+        verbatimTextOutput("ResultaatOut")
+      )
     )
+    
   )
 )
 
+################################################################################
+
+#### SERVER FUNCTION ###########################################################
+
 server <- function(input, output, session) {
   
+  #### reactive functions ###################
   ProcessImage <- reactive({
     
     progress <- Progress$new(session, min=1, max=15)
@@ -64,6 +97,9 @@ server <- function(input, output, session) {
     features = vgg16_notop %>% predict(x)
     return(features)
   })
+  
+  
+  ###### OUTPUT ELEMENTS ######################################################
   
   output$intro <- renderUI({
     list(
@@ -109,5 +145,6 @@ server <- function(input, output, session) {
 }
 
 
+##### SHINY APP CALL ###########################################################
 
 shinyApp(ui, server)
