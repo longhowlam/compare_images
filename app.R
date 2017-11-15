@@ -10,7 +10,7 @@ library(shiny)
 library(miniUI)
 library(jpeg)
 library(keras)
-
+library(DT)
 
 
 ##### Initals / startup code #################################################
@@ -63,6 +63,14 @@ ui <- miniPage(
       miniContentPanel(
         verbatimTextOutput("ResultaatOut")
       )
+    ),
+    
+    #### Tabel resultaat ###########
+    miniTabPanel(
+      "Tabel", icon = icon("table"),
+      miniContentPanel(
+        dataTableOutput("ResultaatTabel")
+      )
     )
     
   )
@@ -106,6 +114,7 @@ server <- function(input, output, session) {
   
   ###### OUTPUT ELEMENTS ######################################################
   
+  #### intro ####
   output$intro <- renderUI({
     list(
       h4("This shiny app is a dummy for image input and processing"), 
@@ -114,6 +123,7 @@ server <- function(input, output, session) {
   })
   
   
+  #### plaatje ####
   output$plaatje <- renderImage({
     
     inFile = input$file1
@@ -137,12 +147,23 @@ server <- function(input, output, session) {
   deleteFile = FALSE
   )
   
+  
+  #### ResultaatOut ####
   output$ResultaatOut = renderPrint({
     
     cat(ProcessImage())
   })
   
   
+  #### ResultaatTabel ####
+  output$ResultaatTabel =  renderDataTable({
+   
+    zz = datasets::mtcars
+    datatable(
+      rownames = FALSE, 
+      data = zz
+    )
+  })
   
   observeEvent(input$done, {
     stopApp(TRUE)
