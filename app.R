@@ -86,8 +86,13 @@ server <- function(input, output, session) {
     )
     
     inFile = input$file1
+    if(is.null(inFile)){
+      imgfile  = "www/kast.png"
+    }else{
+      imgfile = inFile$datapath
+    }
     
-    img = image_load(inFile$datapath, target_size = c(224,224))
+    img = image_load(imgfile, target_size = c(224,224))
     x = image_to_array(img)
     
     dim(x) <- c(1, dim(x))
