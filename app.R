@@ -11,12 +11,24 @@ library(miniUI)
 library(jpeg)
 library(keras)
 library(DT)
+library(text2vec)
 
 
 ##### Initals / startup code #################################################
 
 vgg16_notop = application_vgg16(weights = 'imagenet', include_top = FALSE)
+ImageFeatures = readRDS("data/ikeafeautures.RDs")
 
+
+##### Addittional helper functions ############################################
+
+calcIkeaDistance = function(x)
+{
+  M1 <- as(matrix(x, ncol = length(x)), "dgCMatrix")
+  out = text2vec::dist2(M1,ImageFeatures)
+  print(out)
+  out
+}
 
 #### MINIPAGE #################################################################
 
@@ -108,7 +120,8 @@ server <- function(input, output, session) {
     
     # extract features
     features = vgg16_notop %>% predict(x)
-    return(features)
+    IkeaDistance = calcIkeaDistance(features)
+    IkeaDistance
   })
   
   
@@ -150,8 +163,8 @@ server <- function(input, output, session) {
   
   #### ResultaatOut ####
   output$ResultaatOut = renderPrint({
-    
-    cat(ProcessImage())
+    pp = ProcessImage()
+    print(pp)
   })
   
   
