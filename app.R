@@ -18,15 +18,14 @@ library(text2vec)
 
 vgg16_notop = application_vgg16(weights = 'imagenet', include_top = FALSE)
 ImageFeatures = readRDS("data/ikeafeautures.RDs")
+ImageMetaData = readRDS("data/ikeaimagesmeta.RDs")
 
+##### Addittional Helper Functions ############################################
 
-##### Addittional helper functions ############################################
-
-calcIkeaDistance = function(x)
+calcIkeaSimilarity = function(x)
 {
   M1 <- as(matrix(x, ncol = length(x)), "dgCMatrix")
-  out = text2vec::dist2(M1,ImageFeatures)
-  print(out)
+  out = text2vec::sim2(M1,ImageFeatures)
   out
 }
 
@@ -120,7 +119,7 @@ server <- function(input, output, session) {
     
     # extract features
     features = vgg16_notop %>% predict(x)
-    IkeaDistance = calcIkeaDistance(features)
+    IkeaDistance = calcIkeaSimilarity(features)
     IkeaDistance
   })
   
@@ -171,10 +170,19 @@ server <- function(input, output, session) {
   #### ResultaatTabel ####
   output$ResultaatTabel =  renderDataTable({
    
-    zz = datasets::mtcars
+    simies = ProcessImage()
+    ImageMetaData2 = ImageMetaData
+    ImageMetaData2$similarities = as.numeric(simies)
+    ImageMetaData2$image = paste0(
+      "<img src='",
+      ImageMetaData2$imagefile,
+      "'",
+      "height='80' width='90' </img>"
+    )
     datatable(
+      escape = FALSE,
       rownames = FALSE, 
-      data = zz
+      data = ImageMetaData2
     )
   })
   
