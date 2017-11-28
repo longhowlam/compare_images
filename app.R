@@ -18,7 +18,7 @@ library(text2vec)
 
 vgg16_notop = application_vgg16(weights = 'imagenet', include_top = FALSE)
 ImageFeatures = readRDS("data/ikeafeautures.RDs")
-ImageMetaData = readRDS("data/ikeaimagesmeta.RDs")
+ImageMetaData = readRDS("data/AllImages.RDs")
 
 ##### Addittional Helper Functions ############################################
 
@@ -69,12 +69,12 @@ ui <- miniPage(
     ),
     
     #### Resultaat tab ############
-    miniTabPanel(
-      "Resultaat", icon = icon("table"),
-      miniContentPanel(
-        verbatimTextOutput("ResultaatOut")
-      )
-    ),
+#    miniTabPanel(
+#      "Resultaat", icon = icon("table"),
+#      miniContentPanel(
+#        verbatimTextOutput("ResultaatOut")
+#      )
+#    ),
     
     #### Tabel resultaat ###########
     miniTabPanel(
@@ -172,18 +172,28 @@ server <- function(input, output, session) {
    
     simies = ProcessImage()
     ImageMetaData2 = ImageMetaData
-    ImageMetaData2$similarities = as.numeric(simies)
+    
+    ImageMetaData2$match = as.numeric(simies)
     ImageMetaData2$image = paste0(
       "<img src='",
       ImageMetaData2$imagefile,
       "'",
       "height='80' width='90' </img>"
     )
+    
+    ImageMetaData2$link = paste0(
+      "<a href='",
+      ImageMetaData2$link,
+      "'>",
+      "Ikea page</a>"
+    )
+    
+    ImageMetaData2$imagefile = NULL
     datatable(
       escape = FALSE,
       rownames = FALSE, 
       data = ImageMetaData2
-    )
+    ) %>%   formatPercentage('match', 1) 
   })
   
   observeEvent(input$done, {
