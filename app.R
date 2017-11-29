@@ -18,14 +18,14 @@ library(text2vec)
 
 vgg16_notop = application_vgg16(weights = 'imagenet', include_top = FALSE)
 ImageFeatures = readRDS("data/ikeafeautures.RDs")
-ImageMetaData = readRDS("data/AllImages.RDs")
+ImageMetaData = readRDS("data/Allimages.RDs")
 
 ##### Addittional Helper Functions ############################################
 
 calcIkeaSimilarity = function(x)
 {
   M1 <- as(matrix(x, ncol = length(x)), "dgCMatrix")
-  out = text2vec::sim2(M1,ImageFeatures)
+  out = 1-text2vec::dist2(M1,ImageFeatures)
   out
 }
 
@@ -53,7 +53,7 @@ ui <- miniPage(
       "Parameters", icon = icon("sliders"),
       miniContentPanel(
         fileInput('file1', 'Choose an image (max 5MB)'),
-        numericInput("input1", "dummy input 1", value=100),
+        numericInput("input_topN", "Show top N matches", value=7),
         numericInput("input2", "dummy input 2", value=2),
         checkboxInput("input3", "dummy input 3", value = FALSE)
       )
@@ -176,6 +176,7 @@ server <- function(input, output, session) {
     ImageMetaData2$match = as.numeric(simies)
     ImageMetaData2$image = paste0(
       "<img src='",
+      "http://www.ikea.com/nl/nl/images/products/",
       ImageMetaData2$imagefile,
       "'",
       "height='80' width='90' </img>"
@@ -184,15 +185,18 @@ server <- function(input, output, session) {
     ImageMetaData2$link = paste0(
       "<a href='",
       ImageMetaData2$link,
-      "'>",
+      "' target='_blank'>",
       "Ikea page</a>"
     )
     
     ImageMetaData2$imagefile = NULL
+    ImageMetaData2$remove = NULL
+    finaltable = dplyr::arrange(ImageMetaData2,desc(match)) %>% dplyr::slice(1:input$input_topN)
     datatable(
+      options = list(dom = 't'),
       escape = FALSE,
       rownames = FALSE, 
-      data = ImageMetaData2
+      data = finaltable
     ) %>%   formatPercentage('match', 1) 
   })
   
