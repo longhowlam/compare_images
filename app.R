@@ -17,7 +17,7 @@ library(text2vec)
 ##### Initals / startup code #################################################
 
 vgg16_notop = application_vgg16(weights = 'imagenet', include_top = FALSE)
-ImageFeatures = readRDS("data/ikeafeautures.RDs")
+ImageFeatures = readRDS("data/ikeafeauturesVGG16.RDs")
 ImageMetaData = readRDS("data/Allimages.RDs")
 
 ##### Addittional Helper Functions ############################################
@@ -54,8 +54,7 @@ ui <- miniPage(
       miniContentPanel(
         fileInput('file1', 'Choose an image (max 5MB)'),
         numericInput("input_topN", "Show top N matches", value=7),
-        numericInput("input2", "dummy input 2", value=2),
-        checkboxInput("input3", "dummy input 3", value = FALSE)
+        selectInput("typeselect", "help me out here", choices = list(), selected = 1)
       )
     ),
  
@@ -92,6 +91,17 @@ ui <- miniPage(
 #### SERVER FUNCTION ###########################################################
 
 server <- function(input, output, session) {
+  
+  #### observe functions ####################
+  observe({
+    # Create a list of new options, where the name of the items is something
+    # like 'option label x 1', and the values are 'option-x-1'.
+    s_options <- as.list(c("I feel Lucky", names(table(ImageMetaData$type2))))
+    
+    updateSelectInput(session, "typeselect", choices = s_options)
+    
+  })
+  
   
   #### reactive functions ###################
   ProcessImage <- reactive({
@@ -186,12 +196,15 @@ server <- function(input, output, session) {
       "<a href='",
       ImageMetaData2$link,
       "' target='_blank'>",
-      "Ikea page</a>"
+      "'",
+      ImageMetaData2$name,
+      "'</a>"
     )
     
-    ImageMetaData2$imagefile = NULL
-    ImageMetaData2$remove = NULL
-    finaltable = dplyr::arrange(ImageMetaData2,desc(match)) %>% dplyr::slice(1:input$input_topN)
+    finaltable = dplyr::arrange(ImageMetaData2,desc(match)) %>% 
+      dplyr::slice(1:input$input_topN) %>%
+      dplyr::select(image, link, type2, match, price)
+    
     datatable(
       options = list(dom = 't'),
       escape = FALSE,
