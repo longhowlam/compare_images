@@ -35,7 +35,7 @@ ui <- miniPage(
   gadgetTitleBar(
     left = NULL, 
     right = NULL,
-    "compare an image"
+    "Check Ikea First"
   ),
   
   miniTabstripPanel(
@@ -50,7 +50,7 @@ ui <- miniPage(
     
     #### parameters tab ##############
     miniTabPanel(
-      "Parameters", icon = icon("sliders"),
+      "Take_picture", icon = icon("sliders"),
       miniContentPanel(
         fileInput('file1', 'Choose an image (max 5MB)'),
         numericInput("input_topN", "Show top N matches", value=7),
@@ -60,7 +60,7 @@ ui <- miniPage(
  
     #### image tab ##################
     miniTabPanel(
-      "image", icon = icon("file-image-o"),
+      "Image_taken", icon = icon("file-image-o"),
       miniContentPanel(
         padding = 0,
         imageOutput("plaatje")
@@ -77,7 +77,7 @@ ui <- miniPage(
     
     #### Tabel resultaat ###########
     miniTabPanel(
-      "Tabel", icon = icon("table"),
+      "Best_Matches", icon = icon("table"),
       miniContentPanel(
         dataTableOutput("ResultaatTabel")
       )
@@ -111,7 +111,7 @@ server <- function(input, output, session) {
     
     progress$set(
       message = 'in progress', 
-      detail = 'This may take some time...'
+      detail = 'This may take a few seconds...'
     )
     
     inFile = input$file1
@@ -139,8 +139,8 @@ server <- function(input, output, session) {
   #### intro ####
   output$intro <- renderUI({
     list(
-      h4("This shiny app is a dummy for image input and processing"), 
-      h4("Cheers, Longhow")
+      h4("When NOT at an IKEA store, take a picture of what you see, check if Ikea has something similair and then GO TO Ikea"), 
+      img(SRC="InstructiesIkea.PNG", height = 340)
     )
   })
   
@@ -206,7 +206,12 @@ server <- function(input, output, session) {
       dplyr::select(image, link, type2, match, price)
     
     datatable(
-      options = list(dom = 't'),
+      options = list(
+        dom = 't',
+        autoWidth = FALSE,
+        columnDefs = list(list(width = '200px', targets = c(1, 3)))
+      ),
+      
       escape = FALSE,
       rownames = FALSE, 
       data = finaltable
